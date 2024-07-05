@@ -1,17 +1,17 @@
 import torch
-from model3 import discriminator, generator
+from model import discriminator, generator
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 
-#Hyperparameter settings
+#hyperparameter settings
 epochs = 500
-lr = 0.001 # previsouly set at lr = 0.0002
-batch_size = 32
+lr = 0.0002
+batch_size = 64
 loss = torch.nn.BCELoss()
 
 
-# Model
+#model
 G = generator()
 D = discriminator()
 
@@ -23,6 +23,12 @@ D_optimizer = torch.optim.Adam(D.parameters(), lr=lr, betas=(0.5, 0.999))
 images = torch.load("dataset.pt")
 loader = torch.split(images, batch_size)
 
+#show some images
+# for i in range(15):
+#     img = loader[0][i].permute(1, 2, 0) #reshape from (3, 64, 64) to (64, 64, 3)
+#     img = ((img + 1) * (255/2)).int() #reverse normalization
+#     plt.imshow(img)
+#     plt.show()
 
 
 D_loss_list = []
@@ -36,7 +42,7 @@ for epoch in tqdm(range(epochs)):
         real_outputs = D(real_inputs)
         real_label = torch.ones(real_inputs.shape[0], 1)
 
-        noise = (torch.rand(real_inputs.shape[0], 128) - 0.5) / 0.5
+        noise = (torch.rand(real_inputs.shape[0], 128, 1, 1) - 0.5) / 0.5
         fake_inputs = G(noise)
         fake_outputs = D(fake_inputs)
         fake_label = torch.zeros(fake_inputs.shape[0], 1)
@@ -51,7 +57,7 @@ for epoch in tqdm(range(epochs)):
 
 
         # Training the generator
-        noise = (torch.rand(real_inputs.shape[0], 128) - 0.5) / 0.5
+        noise = (torch.rand(real_inputs.shape[0], 128, 1, 1) - 0.5) / 0.5
         fake_inputs = G(noise)
         fake_outputs = D(fake_inputs)
         fake_targets = torch.ones([fake_inputs.shape[0], 1])
@@ -64,21 +70,20 @@ for epoch in tqdm(range(epochs)):
 
         if (i+1)%50 == 0:
             print(f'Epoch {epoch+1} Image {i+1}/{int(images.shape[0]/batch_size)}: discriminator_loss {D_loss.item():.3f} generator_loss {G_loss.item():.3f}')
-
-            D_loss_list.append(D_loss.item())
-            G_loss_list.append(G_loss.item())
-
-            plt.figure(figsize=(14, 6))
-            plt.subplot(1, 2, 1)
-            plt.plot(D_loss_list, c="blue", linewidth=1)
-            plt.plot(G_loss_list, c="red", linewidth=1)
-            plt.subplot(1, 2, 2)
-            plt.imshow(fake_inputs[0].detach().reshape(64, 64), cmap="Greys")
-            plt.pause(0.001)
-
         i += 1
 
 
+    D_loss_list.append(D_loss.item())
+    G_loss_list.append(G_loss.item())
+
+    plt.figure(figsize=(14, 6))
+    plt.subplot(1, 2, 1)
+    plt.plot(D_loss_list, c="blue", linewidth=1)
+    plt.plot(G_loss_list, c="red", linewidth=1)
+    plt.subplot(1, 2, 2)
+    plt.imshow(fake_inputs[0].detach().permute(1, 2, 0))
+    plt.pause(0.001)
+
+
     if (epoch+1) % 5 == 0:
-        # torch.save(G, f'model_parameters/Generator_epoch_{epoch+1}.pt')
-        torch.save(G, f'model_parameters2/Generator_epoch_{epoch+1}.pt')
+        torch.save(G, f'model_parameters/Generator_epoch_{epoch+1}.pt')
