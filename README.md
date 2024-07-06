@@ -14,4 +14,6 @@ Le dossier "resultats" contient des exemples d'images générées (à droite) av
 
 "train.py" permet d'entraîner le model
 
+"model_parameters" contient les paramètres obtenus après entraînement
+
 "test.py" permet de tester le model sur des exemmples du jeu de données
