@@ -16,4 +16,4 @@ Le dossier "resultats" contient des exemples d'images générées (à droite) av
 
 "model_parameters" contient les paramètres obtenus après entraînement
 
-"test.py" permet de tester le model sur des exemmples du jeu de données
+"test.py" permet de tester le model sur des exemples du jeu de données
